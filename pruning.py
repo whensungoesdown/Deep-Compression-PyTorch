@@ -127,8 +127,13 @@ def train_without_modeltrain(epochs):
             output_tuple = model(data)
             orig_output_tuple = uty_model_orig(data)
             #loss = nn.MSELoss(output_tuple[0], orig_output_tuple[0], reduction='sum') + nn.MSELoss(output_tuple[1], orig_output_tuple[1], reduction='sum')
-            loss = nn.MSELoss(reduction='sum');
-            output = loss(output_tuple[0], orig_output_tuple[0])
+            loss_l1 = nn.MSELoss(reduction='mean');
+            output_l1 = loss_l1(output_tuple[0], orig_output_tuple[0])
+
+            loss_l2 = nn.MSELoss(reduction='mean');
+            output_l2 = loss_l1(output_tuple[1], orig_output_tuple[1])
+
+            output = output_l1 + output_l2;
             output.backward()
 
 
