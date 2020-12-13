@@ -11,13 +11,19 @@ class LeNet(PruningModule):
         self.fc2 = linear(300, 100)
         self.fc3 = linear(100, 10)
 
+#    def forward(self, x):
+#        x = x.view(-1, 784)
+#        x = F.relu(self.fc1(x))
+#        x = F.relu(self.fc2(x))
+#        x = F.log_softmax(self.fc3(x), dim=1)
+#        return x
+
     def forward(self, x):
         x = x.view(-1, 784)
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = F.log_softmax(self.fc3(x), dim=1)
-        return x
-
+        l1 = F.relu(self.fc1(x))
+        l2 = F.relu(self.fc2(l1))
+        l2_softmax = F.log_softmax(self.fc3(l2), dim=1)
+        return (l1, l2, l2_softmax)
 
 class LeNet_5(PruningModule):
     def __init__(self, mask=False):

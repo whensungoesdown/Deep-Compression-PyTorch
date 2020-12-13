@@ -1,0 +1,36 @@
+initial_accuracy 94.58
+accuracy_after_pruning 94.58
+initial_accuracy 94.58
+accuracy_after_pruning 94.58
+uty: no retraining, accuracy_after_retraining 94.58
+initial_accuracy 94.58
+accuracy_after_pruning 73.87
+uty: no retraining, accuracy_after_retraining 73.87
+initial_accuracy 94.58
+accuracy_after_pruning 94.55
+uty: no retraining, accuracy_after_retraining 94.55
+initial_accuracy 94.58
+accuracy_after_pruning 94.55
+uty: no retraining, accuracy_after_retraining 94.55
+initial_accuracy 94.58
+accuracy_after_pruning 91.54
+uty: no retraining, accuracy_after_retraining 91.54
+initial_accuracy 94.58
+accuracy_after_pruning 91.54
+uty: no retraining, accuracy_after_retraining 96.7
+initial_accuracy 94.58
+accuracy_after_pruning 73.87
+uty: no retraining, accuracy_after_retraining 97.11
+initial_accuracy 94.58
+initial_accuracy 94.58
+accuracy_after_pruning 73.87
+uty: no retraining, accuracy_after_retraining 96.95
+initial_accuracy 94.58
+accuracy_after_pruning 73.87
+initial_accuracy 94.58
+accuracy_after_pruning 73.87
+initial_accuracy 94.58
+accuracy_after_pruning 73.87
+initial_accuracy 94.58
+accuracy_after_pruning 73.87
+uty: no retraining, accuracy_after_retraining 9.8

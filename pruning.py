@@ -17,6 +17,7 @@ os.makedirs('saves', exist_ok=True)
 
 # Training settings
 parser = argparse.ArgumentParser(description='PyTorch MNIST pruning from deep compression paper')
+#parser.add_argument('--batch-size', type=int, default=50, metavar='N',
 parser.add_argument('--batch-size', type=int, default=50, metavar='N',
                     help='input batch size for training (default: 50)')
 parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
@@ -33,7 +34,7 @@ parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                     help='how many batches to wait before logging training status')
 parser.add_argument('--log', type=str, default='log.txt',
                     help='log file name')
-parser.add_argument('--sensitivity', type=float, default=2,
+parser.add_argument('--sensitivity', type=float, default=0.25,
                     help="sensitivity value that is multiplied to layer's std in order to get threshold value")
 args = parser.parse_args()
 
@@ -83,7 +84,14 @@ def train(epochs):
         for batch_idx, (data, target) in pbar:
             data, target = data.to(device), target.to(device)
             optimizer.zero_grad()
-            output = model(data)
+            output_tuple = model(data)
+            output = output_tuple[2]
+            # uty: test
+            #print('!!!!!!')
+            #print(type(output))
+            #print(batch_idx)
+            #print(output)
+            #print(target)
             loss = F.nll_loss(output, target)
             loss.backward()
 
@@ -103,6 +111,43 @@ def train(epochs):
                 pbar.set_description(f'Train Epoch: {epoch} [{done:5}/{len(train_loader.dataset)} ({percentage:3.0f}%)]  Loss: {loss.item():.6f}')
 
 
+def train_without_modeltrain(epochs):
+#    model.train()
+    for epoch in range(epochs):
+        pbar = tqdm(enumerate(train_loader), total=len(train_loader))
+        for batch_idx, (data, target) in pbar:
+            data, target = data.to(device), target.to(device)
+            optimizer.zero_grad()
+            # uty: test
+            #output_tuple = model(data)
+            #output = output_tuple[2]
+            #loss = F.nll_loss(output, target)
+            #loss.backward()
+
+            output_tuple = model(data)
+            orig_output_tuple = uty_model_orig(data)
+            #loss = nn.MSELoss(output_tuple[0], orig_output_tuple[0], reduction='sum') + nn.MSELoss(output_tuple[1], orig_output_tuple[1], reduction='sum')
+            loss = nn.MSELoss(reduction='sum');
+            output = loss(output_tuple[0], orig_output_tuple[0])
+            output.backward()
+
+
+            # zero-out all the gradients corresponding to the pruned connections
+            for name, p in model.named_parameters():
+                if 'mask' in name:
+                    continue
+                tensor = p.data.cpu().numpy()
+                grad_tensor = p.grad.data.cpu().numpy()
+                grad_tensor = np.where(tensor==0, 0, grad_tensor)
+                p.grad.data = torch.from_numpy(grad_tensor).to(device)
+
+            optimizer.step()
+            if batch_idx % args.log_interval == 0:
+                done = batch_idx * len(data)
+                percentage = 100. * batch_idx / len(train_loader)
+                #pbar.set_description(f'Train Epoch: {epoch} [{done:5}/{len(train_loader.dataset)} ({percentage:3.0f}%)]  Loss: {loss.item():.6f}')
+                pbar.set_description(f'Train Epoch: {epoch} [{done:5}/{len(train_loader.dataset)} ({percentage:3.0f}%)]  Loss: {output.item():.6f}')
+
 def test():
     model.eval()
     test_loss = 0
@@ -110,7 +155,10 @@ def test():
     with torch.no_grad():
         for data, target in test_loader:
             data, target = data.to(device), target.to(device)
-            output = model(data)
+            # uty: test
+            output_tuple = model(data)
+            output = output_tuple[2]
+
             test_loss += F.nll_loss(output, target, reduction='sum').item() # sum up batch loss
             pred = output.data.max(1, keepdim=True)[1] # get the index of the max log-probability
             correct += pred.eq(target.data.view_as(pred)).sum().item()
@@ -130,6 +178,18 @@ torch.save(model, f"saves/initial_model.ptmodel")
 print("--- Before pruning ---")
 util.print_nonzeros(model)
 
+# uty: test copy a model instance for later reference
+
+uty_model_orig = type(model)(mask=True)
+uty_model_orig.load_state_dict(model.state_dict()) # copy weights and stuff
+
+
+print("!!!test")
+print(model)
+print(uty_model_orig)
+print("\n")
+
+
 # Pruning
 model.prune_by_std(args.sensitivity)
 accuracy = test()
@@ -137,13 +197,18 @@ util.log(args.log, f"accuracy_after_pruning {accuracy}")
 print("--- After pruning ---")
 util.print_nonzeros(model)
 
+# uty test
 # Retrain
 print("--- Retraining ---")
 optimizer.load_state_dict(initial_optimizer_state_dict) # Reset the optimizer
-train(args.epochs)
+#train(args.epochs)
+train_without_modeltrain(args.epochs)
+
+
 torch.save(model, f"saves/model_after_retraining.ptmodel")
 accuracy = test()
-util.log(args.log, f"accuracy_after_retraining {accuracy}")
+#util.log(args.log, f"accuracy_after_retraining {accuracy}")
+util.log(args.log, f"uty: no retraining, accuracy_after_retraining {accuracy}")
 
 print("--- After Retraining ---")
 util.print_nonzeros(model)
