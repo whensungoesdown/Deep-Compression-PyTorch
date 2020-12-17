@@ -22,8 +22,8 @@ class LeNet(PruningModule):
         x = x.view(-1, 784)
         l1 = F.relu(self.fc1(x))
         l2 = F.relu(self.fc2(l1))
-        l2_softmax = F.log_softmax(self.fc3(l2), dim=1)
-        return (l1, l2, l2_softmax)
+        l3_softmax = F.log_softmax(self.fc3(l2), dim=1)
+        return (l1, l2, l3_softmax)
 
 class LeNet_5(PruningModule):
     def __init__(self, mask=False):
