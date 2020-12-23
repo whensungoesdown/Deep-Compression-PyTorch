@@ -13,6 +13,12 @@ from net.models import LeNet
 from net.quantization import apply_weight_sharing
 import util
 
+from torch.utils.tensorboard import SummaryWriter
+
+
+# Writer will output to ./runs/ directory by default
+writer = SummaryWriter()
+
 os.makedirs('saves', exist_ok=True)
 
 # Training settings
@@ -95,14 +101,36 @@ def train(epochs):
             loss = F.nll_loss(output, target)
             loss.backward()
 
+
+            #grads = []
             # zero-out all the gradients corresponding to the pruned connections
             for name, p in model.named_parameters():
+               # print("name: ")
+               # print(name)
+               # print("p: ")
+               # print(p)
+               # print("p.grad: ")
+               # print(p.grad)
+                if 'fc2.weight' in name:
+                    fc2_grads = p.grad
+                    #print("fc2_grads: ")
+                    #print(fc2_grads)
+
                 if 'mask' in name:
                     continue
                 tensor = p.data.cpu().numpy()
                 grad_tensor = p.grad.data.cpu().numpy()
                 grad_tensor = np.where(tensor==0, 0, grad_tensor)
                 p.grad.data = torch.from_numpy(grad_tensor).to(device)
+                #np.append(grads, p.grad.data.cpu().numpy())
+
+            #grads.append(p.grad.data.cpu().numpy())
+
+            #print("grads: ")
+            #print(grads)
+            #grads = optimizer.compute_gradients(output)
+            #grads = np.array(grads)
+            writer.add_histogram('original/fc2_gradients', fc2_grads, global_step=batch_idx, bins='tensorflow')
 
             optimizer.step()
             if batch_idx % args.log_interval == 0:
@@ -132,25 +160,33 @@ def train_without_modeltrain(epochs):
             #loss_l1 = nn.MSELoss(reduction='mean');
             #output_l1 = loss_l1(output_tuple[0], orig_output_tuple[0])
 
-            #loss_l2 = nn.MSELoss(reduction='mean');
-            #output_l2 = loss_l2(output_tuple[1], orig_output_tuple[1])
+            loss_l2 = nn.MSELoss(reduction='mean');
+            output_l2 = loss_l2(F.log_softmax(output_tuple[1], dim=1), F.log_softmax(orig_output_tuple[1], dim=1))
 
-            loss_l3 = nn.MSELoss(reduction='mean');
-            output_l3 = loss_l3(output_tuple[2], orig_output_tuple[2])
+            #loss_l3 = nn.MSELoss(reduction='mean');
+            #output_l3 = loss_l3(output_tuple[3], orig_output_tuple[3])
 
             #output = output_l1 + output_l2;
-            output = output_l3
+            output = output_l2
             output.backward()
 
 
+            #grads = np.array()
             # zero-out all the gradients corresponding to the pruned connections
             for name, p in model.named_parameters():
+                if 'fc2.weight' in name:
+                    fc2_grads = p.grad
+
                 if 'mask' in name:
                     continue
                 tensor = p.data.cpu().numpy()
                 grad_tensor = p.grad.data.cpu().numpy()
                 grad_tensor = np.where(tensor==0, 0, grad_tensor)
                 p.grad.data = torch.from_numpy(grad_tensor).to(device)
+                #np.append(grads, p.grad.data.cpu().numpy())
+           
+            #grads = optimizer.compute_gradients(output)
+            writer.add_histogram('prune/fc2_gradients', fc2_grads, global_step=batch_idx, bins='tensorflow')
 
             optimizer.step()
             if batch_idx % args.log_interval == 0:
@@ -215,6 +251,8 @@ optimizer.load_state_dict(initial_optimizer_state_dict) # Reset the optimizer
 #train(args.epochs)
 train_without_modeltrain(args.epochs)
 
+
+writer.close()
 
 torch.save(model, f"saves/model_after_retraining.ptmodel")
 accuracy = test()
