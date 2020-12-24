@@ -79,6 +79,33 @@ model = LeNet(mask=True).to(device)
 print(model)
 util.print_model_parameters(model)
 
+
+
+
+def add_100_to_10 (a):
+
+    b = torch.empty(10, dtype=torch.float)
+    b.fill_(0)
+
+    for i in range(10):
+        for j in range(10):
+            b[i].add_(a[i*10+j])
+
+    return b
+
+def add_100_to_10_batch50 (a):
+
+    b = torch.empty(50, 10, dtype=torch.float)
+    b.fill_(0)
+
+    for batch in range(50):
+        for i in range(10):
+            for j in range(10):
+                b[batch, i].add_(a[batch, i*10+j])
+                                                                    
+    return b
+
+
 # NOTE : `weight_decay` term denotes L2 regularization loss term
 optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=0.0001)
 initial_optimizer_state_dict = optimizer.state_dict()
@@ -93,6 +120,11 @@ def train(epochs):
             output_tuple = model(data)
             output = output_tuple[2]
             # uty: test
+            #print("!!!!!!!!")
+            #print(output_tuple[0].size())
+            #print(output_tuple[1].size())
+            #print(output_tuple[2].size())
+            #print(output_tuple[3].size())
             #print('!!!!!!')
             #print(type(output))
             #print(batch_idx)
@@ -130,7 +162,7 @@ def train(epochs):
             #print(grads)
             #grads = optimizer.compute_gradients(output)
             #grads = np.array(grads)
-            writer.add_histogram('original/fc2_gradients', fc2_grads, global_step=batch_idx, bins='tensorflow')
+#            writer.add_histogram('original/fc2_gradients', fc2_grads, global_step=batch_idx, bins='tensorflow')
 
             optimizer.step()
             if batch_idx % args.log_interval == 0:
@@ -161,7 +193,8 @@ def train_without_modeltrain(epochs):
             #output_l1 = loss_l1(output_tuple[0], orig_output_tuple[0])
 
             loss_l2 = nn.MSELoss(reduction='mean');
-            output_l2 = loss_l2(F.log_softmax(output_tuple[1], dim=1), F.log_softmax(orig_output_tuple[1], dim=1))
+            #output_l2 = loss_l2(F.log_softmax(output_tuple[1], dim=1), F.log_softmax(orig_output_tuple[1], dim=1))
+            output_l2 = loss_l2(add_100_to_10_batch50(output_tuple[1]), add_100_to_10_batch50(orig_output_tuple[1]))
 
             #loss_l3 = nn.MSELoss(reduction='mean');
             #output_l3 = loss_l3(output_tuple[3], orig_output_tuple[3])
@@ -186,7 +219,7 @@ def train_without_modeltrain(epochs):
                 #np.append(grads, p.grad.data.cpu().numpy())
            
             #grads = optimizer.compute_gradients(output)
-            writer.add_histogram('prune/fc2_gradients', fc2_grads, global_step=batch_idx, bins='tensorflow')
+#            writer.add_histogram('prune/fc2_gradients', fc2_grads, global_step=batch_idx, bins='tensorflow')
 
             optimizer.step()
             if batch_idx % args.log_interval == 0:
