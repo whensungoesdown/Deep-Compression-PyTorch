@@ -1,0 +1,89 @@
+
+l3_softmax
+
+Test set: Average loss: 0.2613, Accuracy: 9297/10000 (92.97%)
+--- After Retraining ---
+fc1.weight           | nonzeros =   10961 /  235200 (  4.66%) | total_pruned =  224239 | shape = (300, 784)
+fc1.bias             | nonzeros =     300 /     300 (100.00%) | total_pruned =       0 | shape = (300,)
+fc2.weight           | nonzeros =    1404 /   30000 (  4.68%) | total_pruned =   28596 | shape = (100, 300)
+fc2.bias             | nonzeros =     100 /     100 (100.00%) | total_pruned =       0 | shape = (100,)
+fc3.weight           | nonzeros =      88 /    1000 (  8.80%) | total_pruned =     912 | shape = (10, 100)
+fc3.bias             | nonzeros =      10 /      10 (100.00%) | total_pruned =       0 | shape = (10,)
+alive: 12863, pruned : 253747, total: 266610, Compression rate :      20.73x  ( 95.18% pruned)
+u@kde:~/prjs/Deep-Compression-PyTorch$ fg
+
+
+
+l3 no softmax
+
+Test set: Average loss: 0.2622, Accuracy: 9289/10000 (92.89%)
+--- After Retraining ---
+fc1.weight           | nonzeros =   10961 /  235200 (  4.66%) | total_pruned =  224239 | shape = (300, 784)
+fc1.bias             | nonzeros =     300 /     300 (100.00%) | total_pruned =       0 | shape = (300,)
+fc2.weight           | nonzeros =    1404 /   30000 (  4.68%) | total_pruned =   28596 | shape = (100, 300)
+fc2.bias             | nonzeros =     100 /     100 (100.00%) | total_pruned =       0 | shape = (100,)
+fc3.weight           | nonzeros =      88 /    1000 (  8.80%) | total_pruned =     912 | shape = (10, 100)
+fc3.bias             | nonzeros =      10 /      10 (100.00%) | total_pruned =       0 | shape = (10,)
+alive: 12863, pruned : 253747, total: 266610, Compression rate :      20.73x  ( 95.18% pruned)
+
+
+
+l2 softmax
+Test set: Average loss: 2.3026, Accuracy: 980/10000 (9.80%)
+--- After Retraining ---
+fc1.weight           | nonzeros =   10961 /  235200 (  4.66%) | total_pruned =  224239 | shape = (300, 784)
+fc1.bias             | nonzeros =     300 /     300 (100.00%) | total_pruned =       0 | shape = (300,)
+fc2.weight           | nonzeros =    1404 /   30000 (  4.68%) | total_pruned =   28596 | shape = (100, 300)
+fc2.bias             | nonzeros =     100 /     100 (100.00%) | total_pruned =       0 | shape = (100,)
+fc3.weight           | nonzeros =      88 /    1000 (  8.80%) | total_pruned =     912 | shape = (10, 100)
+fc3.bias             | nonzeros =      10 /      10 (100.00%) | total_pruned =       0 | shape = (10,)
+alive: 12863, pruned : 253747, total: 266610, Compression rate :      20.73x  ( 95.18% pruned)
+
+
+
+l2 softmax 
+u@kde:~/prjs/Deep-Compression-PyTorch$ python3 pruning.py --sensitivity=2 --batch-size 200
+Test set: Average loss: 2.3026, Accuracy: 980/10000 (9.80%)
+--- After Retraining ---
+fc1.weight           | nonzeros =   10909 /  235200 (  4.64%) | total_pruned =  224291 | shape = (300, 784)
+fc1.bias             | nonzeros =     300 /     300 (100.00%) | total_pruned =       0 | shape = (300,)
+fc2.weight           | nonzeros =    1477 /   30000 (  4.92%) | total_pruned =   28523 | shape = (100, 300)
+fc2.bias             | nonzeros =     100 /     100 (100.00%) | total_pruned =       0 | shape = (100,)
+fc3.weight           | nonzeros =      90 /    1000 (  9.00%) | total_pruned =     910 | shape = (10, 100)
+fc3.bias             | nonzeros =      10 /      10 (100.00%) | total_pruned =       0 | shape = (10,)
+alive: 12886, pruned : 253724, total: 266610, Compression rate :      20.69x  ( 95.17% pruned)
+
+
+
+
+l2 softmax
+u@kde:~/prjs/Deep-Compression-PyTorch$ python3 pruning.py --sensitivity=2 --batch-size 500
+Test set: Average loss: 2.3026, Accuracy: 980/10000 (9.80%)
+--- After Retraining ---
+fc1.weight           | nonzeros =   12026 /  235200 (  5.11%) | total_pruned =  223174 | shape = (300, 784)
+fc1.bias             | nonzeros =     300 /     300 (100.00%) | total_pruned =       0 | shape = (300,)
+fc2.weight           | nonzeros =    1827 /   30000 (  6.09%) | total_pruned =   28173 | shape = (100, 300)
+fc2.bias             | nonzeros =     100 /     100 (100.00%) | total_pruned =       0 | shape = (100,)
+fc3.weight           | nonzeros =      68 /    1000 (  6.80%) | total_pruned =     932 | shape = (10, 100)
+fc3.bias             | nonzeros =      10 /      10 (100.00%) | total_pruned =       0 | shape = (10,)
+alive: 14331, pruned : 252279, total: 266610, Compression rate :      18.60x  ( 94.62% pruned)
+
+
+
+
+
+l2 100 outputs into 10 groups
+
+Train Epoch: 96 [59500/60000 ( 99%)]  Loss: 0.939515: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1200/1200 [11:01<00:00,  1.81it/s]
+Train Epoch: 97 [59500/60000 ( 99%)]  Loss: 0.921467: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1200/1200 [11:02<00:00,  1.81it/s]
+Train Epoch: 98 [59500/60000 ( 99%)]  Loss: 1.968156: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1200/1200 [11:02<00:00,  1.81it/s]
+Train Epoch: 99 [59500/60000 ( 99%)]  Loss: 1.831875: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1200/1200 [11:02<00:00,  1.81it/s]
+Test set: Average loss: 2.3026, Accuracy: 980/10000 (9.80%)
+--- After Retraining ---
+fc1.weight           | nonzeros =   10961 /  235200 (  4.66%) | total_pruned =  224239 | shape = (300, 784)
+fc1.bias             | nonzeros =     300 /     300 (100.00%) | total_pruned =       0 | shape = (300,)
+fc2.weight           | nonzeros =    1404 /   30000 (  4.68%) | total_pruned =   28596 | shape = (100, 300)
+fc2.bias             | nonzeros =     100 /     100 (100.00%) | total_pruned =       0 | shape = (100,)
+fc3.weight           | nonzeros =      88 /    1000 (  8.80%) | total_pruned =     912 | shape = (10, 100)
+fc3.bias             | nonzeros =      10 /      10 (100.00%) | total_pruned =       0 | shape = (10,)
+alive: 12863, pruned : 253747, total: 266610, Compression rate :      20.73x  ( 95.18% pruned)

@@ -192,15 +192,18 @@ def train_without_modeltrain(epochs):
             #loss_l1 = nn.MSELoss(reduction='mean');
             #output_l1 = loss_l1(output_tuple[0], orig_output_tuple[0])
 
-            loss_l2 = nn.MSELoss(reduction='mean');
-            #output_l2 = loss_l2(F.log_softmax(output_tuple[1], dim=1), F.log_softmax(orig_output_tuple[1], dim=1))
-            output_l2 = loss_l2(add_100_to_10_batch50(output_tuple[1]), add_100_to_10_batch50(orig_output_tuple[1]))
+            loss_l1 = nn.MSELoss(reduction='sum');
+            output_l1 = loss_l1(output_tuple[0], orig_output_tuple[0])
 
-            #loss_l3 = nn.MSELoss(reduction='mean');
+            loss_l2 = nn.MSELoss(reduction='sum');
+            output_l2 = loss_l2(output_tuple[1], orig_output_tuple[1])
+            #output_l2 = loss_l2(add_100_to_10_batch50(output_tuple[1]), add_100_to_10_batch50(orig_output_tuple[1]))
+
+            #loss_l3 = nn.MSELoss(reduction='sum');
             #output_l3 = loss_l3(output_tuple[3], orig_output_tuple[3])
 
             #output = output_l1 + output_l2;
-            output = output_l2
+            output = output_l1 + output_l2
             output.backward()
 
 
