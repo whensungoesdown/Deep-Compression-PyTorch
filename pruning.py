@@ -108,6 +108,10 @@ def add_100_to_10_batch50 (a):
 
 # NOTE : `weight_decay` term denotes L2 regularization loss term
 optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=0.0001)
+
+# uty: test
+scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.95)
+
 initial_optimizer_state_dict = optimizer.state_dict()
 
 def train(epochs):
@@ -169,7 +173,7 @@ def train(epochs):
                 done = batch_idx * len(data)
                 percentage = 100. * batch_idx / len(train_loader)
                 pbar.set_description(f'Train Epoch: {epoch} [{done:5}/{len(train_loader.dataset)} ({percentage:3.0f}%)]  Loss: {loss.item():.6f}')
-
+        
 
 def train_without_modeltrain(epochs):
 #    model.train()
@@ -199,11 +203,11 @@ def train_without_modeltrain(epochs):
             output_l2 = loss_l2(output_tuple[1], orig_output_tuple[1])
             #output_l2 = loss_l2(add_100_to_10_batch50(output_tuple[1]), add_100_to_10_batch50(orig_output_tuple[1]))
 
-            #loss_l3 = nn.MSELoss(reduction='sum');
-            #output_l3 = loss_l3(output_tuple[3], orig_output_tuple[3])
+            loss_l3 = nn.MSELoss(reduction='sum');
+            output_l3 = loss_l3(output_tuple[3], orig_output_tuple[3])
 
             #output = output_l1 + output_l2;
-            output = output_l1 + output_l2
+            output = output_l1 + output_l2 + output_l3;
             output.backward()
 
 
@@ -230,6 +234,8 @@ def train_without_modeltrain(epochs):
                 percentage = 100. * batch_idx / len(train_loader)
                 #pbar.set_description(f'Train Epoch: {epoch} [{done:5}/{len(train_loader.dataset)} ({percentage:3.0f}%)]  Loss: {loss.item():.6f}')
                 pbar.set_description(f'Train Epoch: {epoch} [{done:5}/{len(train_loader.dataset)} ({percentage:3.0f}%)]  Loss: {output.item():.6f}')
+
+        scheduler.step()
 
 def test():
     model.eval()
