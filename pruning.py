@@ -110,13 +110,16 @@ def add_100_to_10_batch50 (a):
 optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=0.0001)
 
 # uty: test
-scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.95)
+#scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.95)
+scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=100, gamma=0.10)
 
 initial_optimizer_state_dict = optimizer.state_dict()
 
+# uty: test original model training only needs 100 epochs
 def train(epochs):
     model.train()
     for epoch in range(epochs):
+#    for epoch in range(100):
         pbar = tqdm(enumerate(train_loader), total=len(train_loader))
         for batch_idx, (data, target) in pbar:
             data, target = data.to(device), target.to(device)
@@ -173,6 +176,7 @@ def train(epochs):
                 done = batch_idx * len(data)
                 percentage = 100. * batch_idx / len(train_loader)
                 pbar.set_description(f'Train Epoch: {epoch} [{done:5}/{len(train_loader.dataset)} ({percentage:3.0f}%)]  Loss: {loss.item():.6f}')
+                writer.add_histogram('orig.loss', loss.item(), global_step=epochs, bins='tensorflow')
         
 
 def train_without_modeltrain(epochs):
@@ -234,6 +238,7 @@ def train_without_modeltrain(epochs):
                 percentage = 100. * batch_idx / len(train_loader)
                 #pbar.set_description(f'Train Epoch: {epoch} [{done:5}/{len(train_loader.dataset)} ({percentage:3.0f}%)]  Loss: {loss.item():.6f}')
                 pbar.set_description(f'Train Epoch: {epoch} [{done:5}/{len(train_loader.dataset)} ({percentage:3.0f}%)]  Loss: {output.item():.6f}')
+                writer.add_histogram('prune.loss', output.item(), global_step=epochs, bins='tensorflow')
 
         scheduler.step()
 
